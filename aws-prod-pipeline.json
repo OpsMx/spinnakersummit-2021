@@ -1,0 +1,114 @@
+{
+  "appConfig": {},
+  "description": "This pipeline is the PROD-deploy part of the aws-dev-deploy pipeline.\nProduction application URL:\nhttp://multiclouddemo-phani-loadbal-1458666616.us-east-1.elb.amazonaws.com:8080/greeting\n",
+  "keepWaitingPipelines": false,
+  "lastModifiedBy": "anonymous",
+  "limitConcurrent": true,
+  "notifications": [],
+  "parameterConfig": [
+    {
+      "default": "",
+      "description": "FindImagefromBake",
+      "hasOptions": false,
+      "label": "",
+      "name": "FindImagefromBake",
+      "options": [
+        {
+          "value": ""
+        }
+      ],
+      "pinned": true,
+      "required": false
+    }
+  ],
+  "stages": [
+    {
+      "cloudProvider": "aws",
+      "cloudProviderType": "aws",
+      "name": "Find Image from Tags",
+      "packageName": "${parameters.FindImagefromBake}",
+      "refId": "3",
+      "regions": [
+        "us-east-1"
+      ],
+      "requisiteStageRefIds": [],
+      "tags": {},
+      "type": "findImageFromTags"
+    },
+    {
+      "clusters": [
+        {
+          "account": "my-aws-account",
+          "application": "awsapp",
+          "associatePublicIpAddress": true,
+          "availabilityZones": {
+            "us-east-1": [
+              "us-east-1a"
+            ]
+          },
+          "base64UserData": "bmV3cG9ydD04Mjgy",
+          "capacity": {
+            "desired": 1,
+            "max": 1,
+            "min": 1
+          },
+          "cloudProvider": "aws",
+          "cooldown": 10,
+          "copySourceCustomBlockDeviceMappings": false,
+          "delayBeforeDisableSec": 0,
+          "delayBeforeScaleDownSec": 0,
+          "ebsOptimized": false,
+          "enabledMetrics": [],
+          "freeFormDetails": "production",
+          "healthCheckGracePeriod": 600,
+          "healthCheckType": "EC2",
+          "iamRole": "ec2-instance",
+          "instanceMonitoring": false,
+          "instanceType": "t2.micro",
+          "keyPair": "EC2Keys",
+          "loadBalancers": [
+            "multiclouddemo-phani-loadbal"
+          ],
+          "maxRemainingAsgs": "2",
+          "moniker": {
+            "app": "awsapp",
+            "detail": "production",
+            "stack": "saasdeploy"
+          },
+          "provider": "aws",
+          "rollback": {
+            "onFailure": true
+          },
+          "scaleDown": false,
+          "securityGroups": [
+            "sg-0f89b9be78a1cbf4c"
+          ],
+          "spelLoadBalancers": [],
+          "spelTargetGroups": [],
+          "spotPrice": "",
+          "stack": "saasdeploy",
+          "strategy": "redblack",
+          "subnetType": "external (spinEC2vpc)",
+          "suspendedProcesses": [],
+          "tags": {
+            "Name": "Restapp-prod-deploy"
+          },
+          "targetGroups": [],
+          "targetHealthyDeployPercentage": 100,
+          "terminationPolicies": [
+            "Default"
+          ],
+          "useAmiBlockDeviceMappings": false,
+          "useSourceCapacity": false
+        }
+      ],
+      "name": "Prod-Deploy",
+      "refId": "4",
+      "requisiteStageRefIds": [
+        "3"
+      ],
+      "type": "deploy"
+    }
+  ],
+  "triggers": []
+}

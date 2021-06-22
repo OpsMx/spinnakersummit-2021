@@ -1,0 +1,219 @@
+{
+  "appConfig": {},
+  "description": "This pipeline creates an AMI, Deploy to 2 EC2 instances, connected via VPC to LB, Cats&Dogs App, AWS-Prod pipeline is called for prod-deploy\nApplication: http://multiclouddemo-phani-loadbal-1458666616.us-east-1.elb.amazonaws.com:8080/greeting\nProduction (aws-prod-deploy)\nhttp://multiclouddemo-phani-loadbal-1458666616.us-east-1.elb.amazonaws.com:8080/greeting\n\n",
+  "expectedArtifacts": [
+    {
+      "defaultArtifact": {
+        "artifactAccount": "OpsMx-demoGit",
+        "id": "3d5a1447-a8c5-44a9-930c-ff8f368e21ad",
+        "name": "src/main/java/hello/GreetingController.java",
+        "reference": "https://api.github.com/repos/OpsMx/restapp/contents/src/main/java/hello/GreetingController.java",
+        "type": "github/file",
+        "version": "master"
+      },
+      "displayName": "opsmx-aws",
+      "id": "6c9c6d3f-b134-4b94-a7d1-786e1a35d140",
+      "matchArtifact": {
+        "artifactAccount": "OpsMx-demoGit",
+        "id": "a9781772-19b5-4622-8c5f-07b5097ebf77",
+        "name": "src/main/*.*",
+        "type": "github/file"
+      },
+      "useDefaultArtifact": true,
+      "usePriorArtifact": false
+    }
+  ],
+  "keepWaitingPipelines": false,
+  "lastModifiedBy": "anonymous",
+  "limitConcurrent": true,
+  "notifications": [],
+  "parameterConfig": [],
+  "stages": [
+    {
+      "clusters": [
+        {
+          "account": "my-aws-account",
+          "application": "awsapp",
+          "associatePublicIpAddress": true,
+          "availabilityZones": {
+            "us-east-1": [
+              "us-east-1a"
+            ]
+          },
+          "capacity": {
+            "desired": 1,
+            "max": 1,
+            "min": 1
+          },
+          "cloudProvider": "aws",
+          "cooldown": 10,
+          "copySourceCustomBlockDeviceMappings": false,
+          "delayBeforeDisableSec": 0,
+          "delayBeforeScaleDownSec": 0,
+          "ebsOptimized": false,
+          "enabledMetrics": [],
+          "freeFormDetails": "dev",
+          "healthCheckGracePeriod": 600,
+          "healthCheckType": "EC2",
+          "iamRole": "ec2-instance",
+          "instanceMonitoring": false,
+          "instanceType": "t2.micro",
+          "keyPair": "EC2Keys",
+          "loadBalancers": [
+            "multiclouddemo-phani-loadbal"
+          ],
+          "maxRemainingAsgs": 2,
+          "moniker": {
+            "app": "multiclouddemo",
+            "detail": "dev",
+            "stack": "saascluster"
+          },
+          "provider": "aws",
+          "rollback": {
+            "onFailure": true
+          },
+          "scaleDown": false,
+          "securityGroups": [
+            "sg-0f89b9be78a1cbf4c"
+          ],
+          "spelLoadBalancers": [],
+          "spelTargetGroups": [],
+          "spotPrice": "",
+          "stack": "saascluster",
+          "strategy": "redblack",
+          "subnetType": "external (spinEC2vpc)",
+          "suspendedProcesses": [],
+          "tags": {
+            "Name": "restapp-dev-deploy"
+          },
+          "targetGroups": [],
+          "targetHealthyDeployPercentage": 100,
+          "terminationPolicies": [
+            "Default"
+          ],
+          "useAmiBlockDeviceMappings": false,
+          "useSourceCapacity": false
+        }
+      ],
+      "name": "Dev-Deploy",
+      "refId": "1",
+      "requisiteStageRefIds": [
+        "2"
+      ],
+      "type": "deploy"
+    },
+    {
+      "baseAmi": "ami-0df70cde1da5ba088",
+      "baseLabel": "release",
+      "baseName": "ops-ubuntu14-java-1",
+      "baseOs": "trusty",
+      "cloudProviderType": "aws",
+      "extendedAttributes": {},
+      "name": "Bake",
+      "package": "restapp",
+      "rebake": true,
+      "refId": "2",
+      "region": "us-east-1",
+      "regions": [
+        "us-east-1"
+      ],
+      "requisiteStageRefIds": [
+        "3"
+      ],
+      "skipRegionDetection": true,
+      "storeType": "ebs",
+      "type": "bake",
+      "user": "Sandesh",
+      "vmType": "hvm"
+    },
+    {
+      "continuePipeline": false,
+      "failPipeline": true,
+      "job": "Spin-Deb-AWS-Jav18-Build",
+      "master": "Jenkins",
+      "name": "Build",
+      "parameters": {},
+      "propertyFile": "",
+      "refId": "3",
+      "requisiteStageRefIds": [],
+      "type": "jenkins"
+    },
+    {
+      "cloudProvider": "aws",
+      "cloudProviderType": "aws",
+      "cluster": "multiclouddemo-saascluster-dev",
+      "credentials": "my-aws-account",
+      "moniker": {
+        "app": "awsapp",
+        "cluster": "multiclouddemo-saascluster-dev",
+        "detail": "dev",
+        "stack": "saascluster"
+      },
+      "name": "Rollback Cluster",
+      "refId": "4",
+      "regions": [
+        "us-east-1"
+      ],
+      "requisiteStageRefIds": [
+        "7"
+      ],
+      "stageEnabled": {
+        "expression": "#judgement('Manual Judgment') == 'No'",
+        "type": "expression"
+      },
+      "targetHealthyRollbackPercentage": 100,
+      "type": "rollbackCluster"
+    },
+    {
+      "failPipeline": true,
+      "judgmentInputs": [
+        {
+          "value": "Yes"
+        },
+        {
+          "value": "No"
+        }
+      ],
+      "name": "Manual Judgment",
+      "notifications": [],
+      "refId": "7",
+      "requisiteStageRefIds": [
+        "1"
+      ],
+      "type": "manualJudgment"
+    },
+    {
+      "application": "awsapp",
+      "failPipeline": true,
+      "name": "aws-prod deploy",
+      "pipeline": "a74a87a8-6418-4b6c-8b18-974c34a8106f",
+      "pipelineParameters": {
+        "FindImagefromBake": "${#stage(\"Bake\")[\"outputs\"][\"deploymentDetails\"][0][\"ami\"]}"
+      },
+      "refId": "10",
+      "requisiteStageRefIds": [
+        "7"
+      ],
+      "stageEnabled": {
+        "expression": "#judgement('Manual Judgment') == 'Yes'",
+        "type": "expression"
+      },
+      "type": "pipeline",
+      "waitForCompletion": true
+    }
+  ],
+  "triggers": [
+    {
+      "branch": "master",
+      "enabled": false,
+      "expectedArtifactIds": [
+        "6c9c6d3f-b134-4b94-a7d1-786e1a35d140"
+      ],
+      "project": "OpsMx",
+      "secret": "shared-secret",
+      "slug": "restapp",
+      "source": "github",
+      "type": "git"
+    }
+  ]
+}
